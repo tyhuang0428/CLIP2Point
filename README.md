@@ -78,3 +78,13 @@ python fewshot.py --eval --ckpt [trained_ckpt_path]
 
 ## Acknowledgement
 Our codes are built on [CLIP](https://github.com/openai/CLIP), [MVTN](https://github.com/ajhamdi/MVTN), and [CrossPoint](https://github.com/MohamedAfham/CrossPoint).
+
+## Citation
+```
+@article{huang2022clip2point,
+  title={CLIP2Point: Transfer CLIP to Point Cloud Classification with Image-Depth Pre-training},
+  author={Huang, Tianyu and Dong, Bowen and Yang, Yunhan and Huang, Xiaoshui and Lau, Rynson WH and Ouyang, Wanli and Zuo, Wangmeng},
+  journal={arXiv preprint arXiv:2210.01055},
+  year={2022}
+}
+```
