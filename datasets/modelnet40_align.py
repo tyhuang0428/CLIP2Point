@@ -25,7 +25,7 @@ class ModelNet40Align(Dataset):
             self.paths, self.labels = self._few()
 
     def _load_data(self):
-        DATA_DIR = './data/ModelNet40_Align'
+        DATA_DIR = './data/ModelNet40_manually_aligned'
         self.paths = []
         self.labels = []
         for cat in os.listdir(DATA_DIR):
@@ -51,14 +51,14 @@ class ModelNet40Align(Dataset):
         return few_paths, few_labels
     
     def __getitem__(self, index):       
-        point = torch.from_numpy(offread_uniformed(self.paths[index], 1024)).to(torch.float32)
+        point = torch.from_numpy(offread_uniformed(self.paths[index], self.num_points)).to(torch.float32)
         label = self.labels[index]
         point = pc_normalize(point)
         if self.partition == 'train':
             pt_idxs = np.arange(point.shape[0])
             np.random.shuffle(pt_idxs)
             point = point[pt_idxs]
-            return point[: self.num_points], label
+            return point, label
         return point, label
     
     def __len__(self):

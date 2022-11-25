@@ -20,9 +20,9 @@ class CLIP2Point(nn.Module):
         self.weights = nn.Parameter(torch.ones([]))
         self.criterion = NTXentLoss(temperature = 0.07)
     
-    def infer(self, points):
+    def infer(self, points, rot=False):
         azim, elev, dist = self.selector(points)
-        imgs = self.renderer(points, azim, elev, dist, self.views)
+        imgs = self.renderer(points, azim, elev, dist, self.views, rot=rot)
         b, n, c, h, w = imgs.size()
         imgs = imgs.reshape(b * n, c, h, w)
         imgs = self.point_model(imgs)
@@ -31,7 +31,7 @@ class CLIP2Point(nn.Module):
     
     def forward(self, points, images, a, e, d):
         batch_size = points.shape[0]
-        depths = self.renderer(points, a, e, d, 1, aug=True, rot=True)
+        depths = self.renderer(points, a, e, d, 1, aug=True, rot=False)
         image_feat = self.image_model(images.squeeze(1)).detach()
         depth1 = depths[:, 0]
         depth2 = depths[:, 1]

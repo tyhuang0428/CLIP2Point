@@ -37,9 +37,9 @@ def train(args, io):
     val_prompt_feats = val_prompt_feats / val_prompt_feats.norm(dim=-1, keepdim=True)
     val_prompt_feats = val_prompt_feats
 
-    train_dataloader = DataLoader(ShapeNetRender(partition='train'), batch_size=args.batch_size, shuffle=True, num_workers=4, drop_last=True)
-    val_loader = DataLoader(ShapeNetRender(partition='test'), batch_size=args.test_batch_size, shuffle=True, num_workers=4)
-    test_loader = DataLoader(ModelNet40Align(), batch_size=args.test_batch_size, num_workers=4)
+    train_dataloader = DataLoader(ShapeNetRender(partition='train', num_points=args.num_points), batch_size=args.batch_size, shuffle=True, num_workers=4, drop_last=True)
+    val_loader = DataLoader(ShapeNetRender(partition='test', num_points=args.num_points), batch_size=args.test_batch_size, shuffle=True, num_workers=4)
+    test_loader = DataLoader(ModelNet40Align(num_points=args.num_points), batch_size=args.test_batch_size, num_workers=4)
     gpu_num = torch.cuda.device_count()
     gpus = [i for i in range(gpu_num)]
     device = torch.device(f'cuda:{gpus[0]}' if torch.cuda.is_available() else 'cpu')
@@ -113,9 +113,7 @@ def train(args, io):
             for (points, label) in tqdm(test_loader):
                 b = points.shape[0]
                 points = points.to(device)
-                fps_idx = pointnet2_utils.furthest_point_sample(points, 1024)
-                points = pointnet2_utils.gather_operation(points.transpose(1, 2).contiguous(), fps_idx).transpose(1, 2).contiguous()
-                img_feats = model.module.infer(points)
+                img_feats = model.module.infer(points, True)
                 logits = img_feats @ test_prompt_feats.t()
                 logits = logits.reshape(b, args.views, -1)
                 logits = torch.sum(logits, dim=1)
@@ -151,6 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('--exp_name', type=str, default='test', metavar='N',
                         help='Name of the experiment')
     parser.add_argument('--views', type=int, default=10)
+    parser.add_argument('--num_points', type=int, default=1024)
     parser.add_argument('--ckpt', type=str, default=None)
     parser.add_argument('--dim', type=int, default=0, choices=[0, 512], help='0 if the view angle is not learnable')
     parser.add_argument('--model', type=str, default='PointNet', metavar='N',

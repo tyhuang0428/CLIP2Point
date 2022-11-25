@@ -67,7 +67,7 @@ def torch_center_and_normalize(points,p="inf"):
 
 
 class ShapeNet(data.Dataset):
-    def __init__(self, partition='train', whole=False):
+    def __init__(self, partition='train', whole=False, num_points=1024):
         assert partition in ['train', 'test']
         self.data_root = './data/ShapeNet55/ShapeNet-55'
         self.pc_path = './data/ShapeNet55/shapenet_pc'
@@ -77,7 +77,7 @@ class ShapeNet(data.Dataset):
         self.data_list_file = os.path.join(self.data_root, f'{self.subset}.txt')
         test_data_list_file = os.path.join(self.data_root, 'test.txt')
         
-        self.sample_points_num = 1024
+        self.sample_points_num = num_points
         self.whole = whole
 
         with open(self.data_list_file, 'r') as f:
@@ -156,8 +156,8 @@ class ShapeNetDebug(ShapeNet):
 
 
 class ShapeNetRender(ShapeNet):
-    def __init__(self, partition='train', whole=False):
-        super().__init__(partition, whole)
+    def __init__(self, partition='train', whole=False, num_points=1024):
+        super().__init__(partition, whole, num_points)
         self.partition = partition
         self.views_dist = torch.ones((10), dtype=torch.float, requires_grad=False)
         self.views_elev = torch.asarray((0, 90, 180, 270, 225, 225, 315, 315, 0, 0), dtype=torch.float, requires_grad=False)
@@ -178,7 +178,7 @@ class ShapeNetRender(ShapeNet):
         
         name = sample['taxonomy_id'] + '_' + sample['model_id']
         rand_idx = random.randint(0, 9)
-        image = Image.open('/data/rendering/%s/%d.png' % (name, rand_idx))
+        image = Image.open('./data/rendering/%s/%d.png' % (name, rand_idx))
         image = self.norm(self.totensor(image))
         return image, points, self.views_azim[rand_idx], self.views_elev[rand_idx], self.views_dist[rand_idx]
 
